@@ -18,7 +18,21 @@ body{
 .header{
   color: white;
 }
-
+.button-bar{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.button-bar button{
+  background-color: whitesmoke;
+  color: #282c34;
+}
+/* .canvas-container{
+  height: calc(40% + 50px);
+  width: calc(60% + 50px);
+  background-color: whitesmoke;
+} */
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
