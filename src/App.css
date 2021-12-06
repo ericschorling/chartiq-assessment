@@ -42,11 +42,6 @@ body{
 .alert {
   border: 1px solid red
 }
-/* .canvas-container{
-  height: calc(40% + 50px);
-  width: calc(60% + 50px);
-  background-color: whitesmoke;
-} */
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
