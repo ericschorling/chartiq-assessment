@@ -20,13 +20,27 @@ body{
 }
 .button-bar{
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
   justify-content: center;
 }
 .button-bar button{
   background-color: whitesmoke;
   color: #282c34;
+}
+
+.button-holder button{
+  margin: 10px;
+  background-color: whitesmoke;
+  color: #282c34;
+  width: 100px;
+  padding: 10px;
+  border: 2px solid #282c34;
+  border-radius: 10px;
+}
+
+.alert {
+  border: 1px solid red
 }
 /* .canvas-container{
   height: calc(40% + 50px);

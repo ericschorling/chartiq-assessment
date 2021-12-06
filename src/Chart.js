@@ -4,7 +4,6 @@ import data from './IBM'
 const start_background_color = "white"
 
 const drawXAxis =(numXticks, tickSpacing, xTickSpacing, ctx, w)=>{
-    console.log(numXticks)
     for(let i=0; i<=numXticks; i++) {
         ctx.beginPath();
         ctx.lineWidth = 3;
@@ -31,31 +30,40 @@ const drawXAxis =(numXticks, tickSpacing, xTickSpacing, ctx, w)=>{
     }
 }
 
-const drawXticks =(numYticks, tickSpacing, xTickSpacing, ctx, h, yOffset, data) =>{
-    const dataArr = data.split(',')
+const drawXticks =(startDate, endDate,numYticks, tickSpacing, xTickSpacing, ctx, h, yOffset, data) =>{
+    const dataArr = data.split(',').splice(endDate,numYticks+1)
+    console.log(dataArr)
+    console.log(numYticks, startDate, endDate)
+    let position = 0
     for(let i = 0; i<=numYticks; i++){
         ctx.beginPath();
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#000000';
-
-        ctx.moveTo(tickSpacing*i+yOffset, h*.8);
-        ctx.lineTo(tickSpacing*i+yOffset, (h*.8)+xTickSpacing);
+        
+        ctx.moveTo(tickSpacing*position+yOffset, h*.8);
+        ctx.lineTo(tickSpacing*position+yOffset, (h*.8)+xTickSpacing);
         ctx.stroke();
-
+    
         ctx.font= '10px Arial';
-        ctx.translate(tickSpacing*i+yOffset, (h*.8)+xTickSpacing);
+        ctx.translate(tickSpacing*position+yOffset, (h*.8)+xTickSpacing);
         ctx.rotate(-Math.PI / 4);
         ctx.textAlign='right';
         ctx.fillStyle = '#000000';
-        let dataLabel = dataArr[numYticks-i].split("\t")[0].split('-')
+        console.log(dataArr[numYticks-i])
+        let dataLabel = dataArr[numYticks - i].split("\t")[0].split('-')
         let finalLabel = `${dataLabel[1]}-${dataLabel[2]}-${dataLabel[0]}`
         ctx.fillText(finalLabel, 0,0);
         
         ctx.setTransform(1,0,0,1,0,0);
+        position += 1
     }
 }
-const drawYAxis =(numYticks, tickSpacing, ctx, h, yOffset, xTickSpacing)=>{
-    console.log(yOffset,tickSpacing, numYticks)
+const drawYAxis =(numYticks, tickSpacing, ctx, h,w, yOffset, xTickSpacing)=>{
+    const fontHeight = (h*.05)
+    ctx.font= `${fontHeight}px Arial`;
+    ctx.textAlign='right';
+    ctx.fillStyle = '#000000';
+    ctx.fillText(`Date`, w*.5,h*.95)
     for(let i=0; i<=numYticks; i++) {
         ctx.beginPath();
         ctx.lineWidth = 5;
@@ -82,6 +90,15 @@ const drawYAxis =(numYticks, tickSpacing, ctx, h, yOffset, xTickSpacing)=>{
     }
 }
 const drawYTicks =(numYticks, tickSpacing, ctx, w, dataReduction, xTickSpacing) =>{
+    const fontHeight = w*.03
+    ctx.font= `${fontHeight}px Arial`;
+    ctx.textAlign='right';
+    ctx.fillStyle = '#000000';
+    ctx.rotate(-Math.PI / 2);
+    ctx.translate(-w*.2, 30)
+    ctx.fillText(`Closing($)`, 0,0)
+    ctx.rotate(Math.PI / 2)
+    ctx.setTransform(1,0,0,1,0,0);
     for(let i = 1; i<=numYticks; i++){
         ctx.beginPath();
         ctx.lineWidth = 2;
@@ -114,11 +131,19 @@ const returnDates = (data)=>{
     return dateData
 }
 
-const drawData = (data, tickSpacing, numYticks, ctx, h, yOffset, dataReduction, resolution)=>{
-    let dataArr = data.split(',')
+const indexDate=(date, dateArray)=>{
+    console.log(date)
+    console.log(dateArray.indexOf(date))
+    return dateArray.indexOf(date)
+}
+
+const drawData = (data,endDate, startDate, numDates, tickSpacing, ctx, h, yOffset, dataReduction, resolution)=>{
+    let inputDataArr = data.split(',')
+    let dataArr = inputDataArr.splice(endDate, numDates+1)
+    console.log(dataArr)
     ctx.translate(yOffset, (h*.8));
     let position = 0
-    for (let i = numYticks; i>= 0; i--){
+    for (let i = numDates; i>=0; i--){
         ctx.beginPath();
         ctx.lineWidth = 3;
         ctx.strokeStyle ="#000000"
@@ -132,7 +157,6 @@ const drawData = (data, tickSpacing, numYticks, ctx, h, yOffset, dataReduction, 
         //i = datalength
         ctx.moveTo(tickSpacing*position,-( currentParameter-dataReduction) * resolution)
         ctx.lineTo(tickSpacing*(position+1), -(nextParameter-dataReduction) *resolution)
-        console.log(-(nextParameter-dataReduction) *resolution)
         ctx.stroke()
         position += 1
 
@@ -146,11 +170,14 @@ const Chart =()=>{
     const contextRef = useRef(null)
     const canvasContainer = useRef(null)
     const [isReset, setIsReset] = useState()
-    const [startDate, setStartDate] = useState('2021-12-02')
-    const [endDate, setEndDate] = useState('2021-11-12')
+    const [startDate, setStartDate] = useState(20)
+    const [endDate, setEndDate] = useState(0)
     const [numDays, setNumDays] = useState(20)
+    const [dateAlert, setDateAlert] = useState(false)
+    const [dataDates, setDataDates] = useState([])
     
     useEffect(() => {
+        console.log(numDays)
         setIsReset(false)
 
 
@@ -169,64 +196,59 @@ const Chart =()=>{
         
         const dataArray = parseData(data)
         const dates = returnDates(data)
-        console.log(dates)
-        let numberOfDates = numDays
+        setDataDates(dates)
         const dataRange = Math.floor(dataArray[dataArray.length-2] - dataArray[0] ) //finding the range between top and bottom values
         const dataReduction = Math.floor(dataArray[dataArray.length -2] - dataRange) //finding the reduction in each element to help increase the resolution on the graph
         const resolution = Math.floor(canvas.height*.8 / dataRange) // how many pixels per data unit should be rendered for each value
         tickSpacing = resolution
         const numXticks = Math.floor(canvas.height* .8 /tickSpacing);
-        const numYticks = numberOfDates
+        const numYticks = numDays
         const yTickSpacing = Math.floor(canvas.width*.9/numYticks)
-        console.log(yTickSpacing)
         //const numYticks = Math.floor(canvas.width * .9 / tickSpacing)
         const yOffset = canvas.width*.1
         
         drawXAxis(numXticks, tickSpacing,yTickSpacing, context, canvas.width)
-        drawYAxis(numYticks, yTickSpacing, context, canvas.height, yOffset,tickSpacing)
-        drawXticks(numYticks, yTickSpacing, tickSpacing, context, canvas.height, yOffset, data)
+        drawYAxis(numYticks, yTickSpacing, context, canvas.height, canvas.width, yOffset,tickSpacing)
+        drawXticks(startDate, endDate, numYticks, yTickSpacing, tickSpacing, context, canvas.height, yOffset, data)
         drawYTicks(numXticks,tickSpacing,context,canvas.width, dataReduction, yTickSpacing)
-        drawData(data, yTickSpacing,numYticks,context,canvas.height,yOffset, dataReduction, resolution)
+        drawData(data, endDate, startDate, numDays, yTickSpacing,context,canvas.height,yOffset, dataReduction, resolution)
 
         contextRef.current = context
     }, [isReset])
 
-    const leaveCanvas =()=>{
-    }
-
     const _handleDateChange=(evt,type)=>{
-        type ? setEndDate(evt.target.value) : setStartDate(evt.target.value)
-        console.log(typeof endDate, startDate)
-    }
+        if (type && evt.target.value > startDate){
+            setDateAlert(true);
+            return;
+        }else {
+            setDateAlert(false);
+            let index = indexDate(evt.target.value, dataDates)
+            type ? setEndDate(index) : setStartDate(index);
+            //setNumDays(startDate - endDate)
+            console.log(startDate, endDate, numDays)
+            //setIsReset(true)
+        }
+    };
 
     const _handleDateInput =(evt) =>{
         if(!evt.target.value){
             return
         }
         setNumDays(evt.target.value)
+        setStartDate(evt.target.value)
+        setEndDate(0)
         setIsReset(true)
     }
-    const _handlePresetDates=(type)=>{
-        switch (type) {
-            case 'one-week':
-                setNumDays(5)
-                setIsReset(true)
-                break;
-            case 'one-month':
-                setNumDays(30)
-                setIsReset(true)
-                break;
-            case 'three-months':
-                setNumDays(90)
-                setIsReset(true)
-                break;
-            case 'one-year':
-                setNumDays(360)
-                setIsReset(true)
-                break;
-            default:
-                break;
-        }
+    const _handleUpdateDateRange=(evt)=>{
+        evt.preventDefault()
+        setNumDays(startDate - endDate)
+        setIsReset(true)
+    }
+    const _handlePresetDates=(num)=>{
+        setNumDays(num)
+        setStartDate(num)
+        setEndDate(0)
+        setIsReset(true)
     }
     return (
         <>
@@ -247,28 +269,33 @@ const Chart =()=>{
             
                     
                     <div className="button-bar">
-                        <input 
-                            type="date"
-                            min="2020-01-01"
-                            max="2021-12-01"
-                            id="date-start"
-                            class='date-picker'
-                            onChange={(evt)=>{_handleDateChange(evt)}}>
-                        </input>
-                        <input 
-                            type="date"
-                            min="2020-01-01"
-                            max="2021-12-01"
-                            id="date-start"
-                            class='date-picker'
-                            onChange={(evt)=>{_handleDateChange(evt, true)}}>
-                        </input>
-                        <label for="days-input">Enter Days to View</label>
-                        <input type="text" id="days-input" onChange={(evt)=>{_handleDateInput(evt)}}></input>
-                        <button onClick={()=>{setNumDays(5)}}>1 Week</button>
-                        <button onClick={(evt)=>{_handlePresetDates('one-month')}}>1 Month</button>
-                        <button onClick={(evt)=>{_handlePresetDates('three-months')}}>3 Months</button>
-                        <button onClick={(evt)=>{_handlePresetDates('one-year')}}>1 Year</button>
+                        <div className="button-holder">
+                            <input 
+                                type="date"
+                                min="2020-12-01"
+                                max="2021-12-01"
+                                id="date-start"
+                                className='date-picker'
+                                onChange={(evt)=>{_handleDateChange(evt)}}>
+                            </input>
+                            <input 
+                                type="date"
+                                min="2020-12-01"
+                                max="2021-12-01"
+                                id="date-start"
+                                className={`date-picker ${dateAlert ? 'alert' : null}`}
+                                onChange={(evt)=>{_handleDateChange(evt, true)}}>
+                            </input>
+                            <button onClick={(evt)=>_handleUpdateDateRange(evt)}>Update</button>
+                            <label for="days-input">Enter Days to View</label>
+                            <input type="text" id="days-input" onChange={(evt)=>{_handleDateInput(evt)}}></input>
+                        </div>
+                        <div className="button-holder">
+                            <button onClick={(evt)=>{_handlePresetDates(5)}}>1 Week</button>
+                            <button onClick={(evt)=>{_handlePresetDates(30)}}>1 Month</button>
+                            <button onClick={(evt)=>{_handlePresetDates(90)}}>3 Months</button>
+                            <button onClick={(evt)=>{_handlePresetDates(253)}}>All Time</button>
+                        </div>
                     </div>
                 </div> 
             </div>
