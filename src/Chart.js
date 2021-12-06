@@ -1,8 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
 import data from './IBM'
 
+//global to set the color of the background of the chart
 const start_background_color = "white"
 
+/**
+ * Function that creates the X Axis on the canvas
+ * @param {integer} numXticks - The number of tick marks along the x axis
+ * @param {integer} tickSpacing - the calculated distance between the ticks based on the data point and size of chart on y axis
+ * @param {integer} xTickSpacing - the calculated distance between the ticks based on the data point and size of chart on x axis 
+ * @param {object} ctx - the context of the canvas
+ * @param {integer} w - width of the canvas
+ */
 const drawXAxis =(numXticks, tickSpacing, xTickSpacing, ctx, w)=>{
     for(let i=0; i<=numXticks; i++) {
         ctx.beginPath();
@@ -17,7 +26,7 @@ const drawXAxis =(numXticks, tickSpacing, xTickSpacing, ctx, w)=>{
             ctx.strokeStyle = "#e9e9e9";
             ctx.lineWidth = 1;
         }
-        
+        //Draw x axis with updated formating 
         if(i === numXticks) {
             ctx.moveTo(w*.1-tickSpacing, tickSpacing*i);
             ctx.lineTo(w, tickSpacing*i);
@@ -30,6 +39,19 @@ const drawXAxis =(numXticks, tickSpacing, xTickSpacing, ctx, w)=>{
     }
 }
 
+/**
+ * 
+ * @param {integer} startDate - starting date index for the chart data to be displayed, can be set by user in date picker input
+ * @param {integer} endDate - ending date index for the chart data
+ * @param {integer} numYticks - number of y data points being displayed
+ * @param {integer} numXTicks - number of x data points being displayed
+ * @param {integer} tickSpacing - spacing of y axis tick marks
+ * @param {integer} xTickSpacing - spacing of x axis tick marks
+ * @param {object} ctx 
+ * @param {integer} h 
+ * @param {integer} yOffset 
+ * @param {array} data 
+ */
 const drawXticks =(startDate, endDate,numYticks, numXTicks, tickSpacing, xTickSpacing, ctx, h, yOffset, data) =>{
     const dataArr = data.split(',').splice(endDate,numYticks+1)
     console.log(dataArr)
