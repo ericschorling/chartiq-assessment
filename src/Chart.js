@@ -30,7 +30,7 @@ const drawXAxis =(numXticks, tickSpacing, xTickSpacing, ctx, w)=>{
     }
 }
 
-const drawXticks =(startDate, endDate,numYticks, tickSpacing, xTickSpacing, ctx, h, yOffset, data) =>{
+const drawXticks =(startDate, endDate,numYticks, numXTicks, tickSpacing, xTickSpacing, ctx, h, yOffset, data) =>{
     const dataArr = data.split(',').splice(endDate,numYticks+1)
     console.log(dataArr)
     console.log(numYticks, startDate, endDate)
@@ -40,12 +40,12 @@ const drawXticks =(startDate, endDate,numYticks, tickSpacing, xTickSpacing, ctx,
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#000000';
         
-        ctx.moveTo(tickSpacing*position+yOffset, h*.8);
-        ctx.lineTo(tickSpacing*position+yOffset, (h*.8)+xTickSpacing);
+        ctx.moveTo(tickSpacing*position+yOffset, xTickSpacing * numXTicks);
+        ctx.lineTo(tickSpacing*position+yOffset, xTickSpacing * numXTicks+xTickSpacing);
         ctx.stroke();
     
         ctx.font= '10px Arial';
-        ctx.translate(tickSpacing*position+yOffset, (h*.8)+xTickSpacing);
+        ctx.translate(tickSpacing*position+yOffset, xTickSpacing * numXTicks+ xTickSpacing);
         ctx.rotate(-Math.PI / 4);
         ctx.textAlign='right';
         ctx.fillStyle = '#000000';
@@ -209,7 +209,7 @@ const Chart =()=>{
         
         drawXAxis(numXticks, tickSpacing,yTickSpacing, context, canvas.width)
         drawYAxis(numYticks, yTickSpacing, context, canvas.height, canvas.width, yOffset,tickSpacing)
-        drawXticks(startDate, endDate, numYticks, yTickSpacing, tickSpacing, context, canvas.height, yOffset, data)
+        drawXticks(startDate, endDate, numYticks, numXticks, yTickSpacing, tickSpacing, context, canvas.height, yOffset, data)
         drawYTicks(numXticks,tickSpacing,context,canvas.width, dataReduction, yTickSpacing)
         drawData(data, endDate, startDate, numDays, yTickSpacing,context,canvas.height,yOffset, dataReduction, resolution)
 
