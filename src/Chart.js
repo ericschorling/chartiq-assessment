@@ -195,6 +195,12 @@ const returnDates = (data)=>{
     
     return dateData
 }
+
+/**
+ * Function to create a 20 day moving average from the closing data provided.
+ * @param {array} data - subsection of the data that will include an extra 20 days to provide data for the moving average. 
+ * @returns {array}
+ */
 const movingAverage = (data) =>{
     let numData = data.map((dataLine)=>(
         Number(dataLine.split('\t')[1])
