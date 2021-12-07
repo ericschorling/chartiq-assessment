@@ -195,6 +195,27 @@ const returnDates = (data)=>{
     
     return dateData
 }
+const movingAverage = (data) =>{
+    let numData = data.map((dataLine)=>(
+        Number(dataLine.split('\t')[1])
+    ))
+    let returnArray =[]
+    let sum = 0
+    for(let i = numData.length-1; i >= 0;i-- ){
+        if(i> numData.length -21){
+            sum += numData[i]
+            console.log(i)
+        }else {
+            
+            returnArray = [(sum /20), ...returnArray]
+            console.log(numData[(i+20)])
+            sum -= numData[(i+20)]
+            sum += numData[i]
+            console.log(i)
+        }
+    }
+    return returnArray
+}
 
 /**
  * Function to return the index of the supplied date in the array of the data provided
@@ -222,7 +243,10 @@ const indexDate=(date, dateArray)=>{
 const drawData = (data,endDate,numDates, tickSpacing, ctx, h, yOffset, dataReduction, resolution)=>{
     //change data to an array and select only the items required for charting
     let inputDataArr = data.split(',')
-    let dataArr = inputDataArr.splice(endDate, numDates+1)
+    let preAverageDataArr = inputDataArr.splice(endDate, numDates+21)
+    console.log(preAverageDataArr)
+    let dataArr = movingAverage(preAverageDataArr)
+    console.log(dataArr)
     //Move the context start to the bottom left of the graph 
     ctx.translate(yOffset, (h*.8));
     let position = 0
@@ -235,8 +259,8 @@ const drawData = (data,endDate,numDates, tickSpacing, ctx, h, yOffset, dataReduc
         if(i === 0){
             return
         }
-        let currentParameter = Number(dataArr[i].split('\t')[1].substr(0,6))
-        let nextParameter = Number(dataArr[i-1].split('\t')[1].substr(0,6))
+        let currentParameter = dataArr[i]
+        let nextParameter = dataArr[i-1]
 
         ctx.moveTo(tickSpacing*position,-( currentParameter-dataReduction) * resolution)
         ctx.lineTo(tickSpacing*(position+1), -(nextParameter-dataReduction) *resolution)
@@ -264,7 +288,6 @@ const Chart =()=>{
     //Canvas rendered immediately upon load 
     //This will rerender every time the isReset value changes 
     useEffect(() => {
-        console.log(numDays);
         setIsReset(false);
 
         //Construct initial canvas
