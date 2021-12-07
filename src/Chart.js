@@ -329,7 +329,7 @@ const Chart =()=>{
         drawData(data, endDate, numDays, yTickSpacing,context,canvas.height,yOffset, dataReduction, resolution);
 
         contextRef.current = context;
-    }, [isReset]);
+    }, [ endDate, numDays,startDate]);
 
     /**
      * Function to handle the change of dates by the user in the date inputs
