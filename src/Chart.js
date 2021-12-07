@@ -285,7 +285,6 @@ const Chart =()=>{
     const canvasRef = useRef(null);
     const contextRef = useRef(null);
     const canvasContainer = useRef(null);
-    const [isReset, setIsReset] = useState();
     const [startDate, setStartDate] = useState(20);
     const [endDate, setEndDate] = useState(0);
     const [numDays, setNumDays] = useState(20);
@@ -294,7 +293,6 @@ const Chart =()=>{
     //Canvas rendered immediately upon load 
     //This will rerender every time the isReset value changes 
     useEffect(() => {
-        setIsReset(false);
 
         //Construct initial canvas
         const canvas = canvasRef.current;
@@ -355,7 +353,6 @@ const Chart =()=>{
      const _handleUpdateDateRange=(evt)=>{
         evt.preventDefault()
         setNumDays(startDate - endDate)
-        setIsReset(true)
     }
     /**
      * Function to update the chart when a user puts in a new number of days
@@ -369,7 +366,6 @@ const Chart =()=>{
         setNumDays(evt.target.value)
         setStartDate(evt.target.value)
         setEndDate(0)
-        setIsReset(true)
     }
     /**
      * Function to update chart when a preset button is pressed
@@ -379,7 +375,6 @@ const Chart =()=>{
         setNumDays(num)
         setStartDate(num)
         setEndDate(0)
-        setIsReset(true)
     }
     return (
         <>
